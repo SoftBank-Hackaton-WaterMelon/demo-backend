@@ -7,15 +7,15 @@
 이 프로젝트는 블루-그린 배포 전략을 시연하기 위한 Node.js 백엔드 서버입니다.
 Prometheus 메트릭 수집, 의도적 에러 생성, 환경별 분기 기능을 포함합니다.
 
-## 🚀 Quick Start
+## 🚀 빠른 시작
 
-### Prerequisites
+### 사전 요구사항
 
 - Node.js 18+ 
 - Docker & Docker Desktop
 - npm or yarn
 
-### Installation
+### 설치
 ```bash
 # 저장소 클론
 git clone <repository-url>
@@ -30,7 +30,7 @@ npm run dev
 
 서버가 `http://localhost:8080`에서 실행됩니다.
 
-## 📁 Project Structure
+## 📁 프로젝트 구조
 ```
 demo-backend/
 ├── src/
@@ -41,7 +41,7 @@ demo-backend/
 └── README.md            # 프로젝트 문서
 ```
 
-## 🔧 Environment Variables
+## 🔧 환경 변수
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -49,7 +49,7 @@ demo-backend/
 | `PORT` | 서버 포트 | `8080` |
 | `APP_VERSION` | 애플리케이션 버전 | `1.0.0` |
 
-## 🌐 API Endpoints
+## 🌐 API 엔드포인트트
 
 ### Health Check
 
@@ -169,7 +169,7 @@ docker build \
   -t demo-backend:prod .
 ```
 
-### Run
+### 실행행
 ```bash
 # 포트 8080으로 실행
 docker run -d -p 8080:8080 --name backend demo-backend:latest
@@ -189,7 +189,7 @@ docker run -d -p 8080:8080 \
 docker ps  # STATUS 컬럼에서 health 상태 확인
 ```
 
-## 📊 Monitoring Integration
+## 📊 모니터링과의 통합합
 
 ### Prometheus Configuration
 
@@ -228,7 +228,7 @@ rate(app_errors_total{environment="production"}[5m])
 rate(http_requests_total{status="500"}[5m])
 ```
 
-## 🔄 Deployment Workflow
+## 🔄 배포 작업 흐름
 
 ### 1. GitHub Actions Integration
 
@@ -260,13 +260,13 @@ GET /metrics
 POST /rollback { "environment": "green", "to_version": "1.0.0" }
 ```
 
-## 🤝 Team Collaboration
+## 🤝 협업 방식
 
 ### 모니터링 담당자
 
 **메트릭 수집 설정:**
 
-Prometheus에서 다음 타겟을 스크래핑하세요:
+Prometheus에서 다음 타겟을 스크래핑해야합니다!:
 - `backend-blue:8080/metrics`
 - `backend-green:8080/metrics`
 
@@ -279,7 +279,7 @@ process_cpu_seconds_total            # CPU 사용률
 nodejs_heap_size_used_bytes          # 메모리 사용량
 ```
 
-### 람다 설정 팀원원
+### 람다 설정 팀원
 
 **ECS 배포 시 필요한 환경 변수:**
 ```python
@@ -313,7 +313,7 @@ Content-Type: application/json
 2. Lambda가 `POST /error/rate {"rate": 0.3}` 호출
 3. 이후 `/api/test` 호출 시 30% 확률로 500 에러 발생
 
-## 🧪 Testing
+## 🧪 테스트트
 
 ### Local Testing
 ```bash
