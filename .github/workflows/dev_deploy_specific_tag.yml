@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      DEPLOY_TAG: ${{ github.event.client_payload.tag }}
+      DEPLOY_TAG: ${{ github.event.client_payload.tag || 'latest' }}
       DEPLOY_ACTION: ${{ github.event.client_payload.action || 'deploy' }}
       DEPLOY_VERSION: ${{ github.event.client_payload.version || github.event.client_payload.tag || 'manual' }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
@@ -22,13 +22,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Validate payload
-        run: |
-          if [ -z "${{ env.DEPLOY_TAG }}" ]; then
-            echo "::error::client_payload.tag 값이 필요합니다."
-            exit 1
-          fi
 
       - name: Display deployment info
         run: |
