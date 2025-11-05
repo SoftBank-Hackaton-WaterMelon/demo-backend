@@ -215,6 +215,7 @@ jobs:
           images: ${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
+            type=edge
             type=ref,event=tag
             type=raw,value=build-${{ github.run_number }}
             type=sha,format=short,event=branch
@@ -238,6 +239,14 @@ jobs:
             echo "image-tag=build-${{ github.run_number }}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Format Docker Tags for Slack
+        if: success()
+        id: format_tags
+        run: |
+          tags="${{ steps.meta.outputs.tags }}"
+          tags="${tags//$'\n'/\\n}"
+          echo "slack-tags=$tags" >> "$GITHUB_OUTPUT"
+
       - name: Notify Slack (Build and Push Docker Image success)
         if: success()
         uses: slackapi/slack-github-action@v1.24.0
@@ -250,11 +259,11 @@ jobs:
                   {
                     "type": "section",
                     "text": {
-                      "type": "mrkdwn",
-                      "text": ":white_check_mark: *Build and Push Docker Image job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n*생성된 태그*:\n${{ steps.meta.outputs.tags }}"
-                    }
-                  },
-                  {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: *Build and Push Docker Image job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n*생성된 태그*:\n${{ steps.format_tags.outputs.slack-tags }}"
+                  }
+                },
+                {
                     "type": "image",
                     "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/build_complete.gif?raw=true",
                     "alt_text": "Success - Thumbs up dog"
