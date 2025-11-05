@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
 
 env:
@@ -47,7 +49,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ":white_check_mark: *Pre-Check job* - `Succeeded`\n*브랜치*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                    "text": ":white_check_mark: *Pre-Check job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
                   }
                 },
                 {
@@ -73,7 +75,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ":x: *Pre-Check job* - `Failed`\n*브랜치*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                    "text": ":x: *Pre-Check job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
                   }
                 },
                 {
@@ -120,7 +122,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ":white_check_mark: *Test job* - `Succeeded`\n*브랜치*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                    "text": ":white_check_mark: *Test job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
                   }
                 },
                 {
@@ -146,7 +148,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ":x: *Test job* - `Failed`\n*브랜치*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                    "text": ":x: *Test job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
                   }
                 },
                 {
@@ -183,7 +185,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ":hammer_and_wrench: *Build Start*\n*브랜치*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                    "text": ":hammer_and_wrench: *Build Start*\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
                   }
                 },
                 {
@@ -212,8 +214,10 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,format=short
             type=ref,event=branch
+            type=ref,event=tag
+            type=raw,value=build-${{ github.run_number }}
+            type=sha,format=short,event=branch
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -228,7 +232,11 @@ jobs:
         id: export
         run: |
           echo "image-name=${{ env.IMAGE_NAME }}" >> "$GITHUB_OUTPUT"
-          echo "image-tag=${{ steps.meta.outputs.version }}" >> "$GITHUB_OUTPUT"
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "image-tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "image-tag=build-${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Notify Slack (Build and Push Docker Image success)
         if: success()
@@ -243,7 +251,7 @@ jobs:
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": ":white_check_mark: *Build and Push Docker Image job* - `Succeeded`\n*브랜치*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                      "text": ":white_check_mark: *Build and Push Docker Image job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n*생성된 태그*:\n${{ steps.meta.outputs.tags }}"
                     }
                   },
                   {
@@ -269,7 +277,7 @@ jobs:
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": ":x: *Build and Push Docker Image job* - `Failed`\n*브랜치*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                      "text": ":x: *Build and Push Docker Image job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
                     }
                   },
                   {
@@ -298,7 +306,7 @@ jobs:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text": ":white_check_mark: *CI/CD 실행 결과*\nBuild: `${{ needs.build.result }}`\nTest: `${{ needs.test.result }}`\nDocker: `${{ needs.build_and_push_docker.result }}`\n"
+              "text": ":checkered_flag: *CI/CD 실행 결과*\nBuild: `${{ needs.build.result }}`\nTest: `${{ needs.test.result }}`\nDocker: `${{ needs.build_and_push_docker.result }}`\n"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
