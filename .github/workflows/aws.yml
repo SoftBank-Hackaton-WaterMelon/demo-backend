@@ -35,7 +35,7 @@ env:
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
-  ECS_TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION }}
+  ECS_TASK_DEFINITION: task-definition.json
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
 
 permissions:
