@@ -161,7 +161,7 @@ app.get('/metrics', async (req, res) => {
 // 9. 루트
 app.get('/', (req, res) => {
   res.json({
-    message: 'Demo Backend',
+    message: 'Demo Backend-v2alsdfjalsdkjf',
     environment: ENV,
     version: VERSION,
     endpoints: [

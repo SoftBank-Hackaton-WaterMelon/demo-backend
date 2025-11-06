@@ -1,0 +1,7 @@
+[
+  {
+    "targetGroupArn": "arn:aws:elasticloadbalancing:ap-northeast-2:339712825142:targetgroup/demo-backend-bluev2/eee3a2efc57b1177",
+    "containerName": "demo-backend",
+    "containerPort": 8080
+  }
+]
