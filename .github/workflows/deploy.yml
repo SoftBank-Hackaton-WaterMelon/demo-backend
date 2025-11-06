@@ -1,0 +1,321 @@
+name: docker image build and push
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  DOCKERFILE_PATH: ./Dockerfile
+
+jobs:
+  build:
+    name: Pre-Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (optional)
+        run: npm run lint --if-present
+
+      - name: Syntax check
+        run: node --check src/server.js
+
+      - name: Notify Slack (Pre-Check success)
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text": ":white_check_mark: *Pre-Check job* - Succeeded",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: *Pre-Check job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                  }
+                },
+                {
+                  "type": "image",
+                  "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/task_start.gif?raw=true",
+                  "alt_text": "Success - Thumbs up dog"
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Notify Slack (Pre-Check failure)
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text": ":x: *Pre-Check job* - Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":x: *Pre-Check job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                  }
+                },
+                {
+                  "type": "image",
+                  "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/failed.gif?raw=true",
+                  "alt_text": "Failure - Sad cat"
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: node --test
+
+      - name: Notify Slack (Test success)
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text": ":white_check_mark: *Test job* - Succeeded",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: *Test job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                  }
+                },
+                {
+                  "type": "image",
+                  "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/building.gif?raw=true",
+                  "alt_text": "Success - Thumbs up dog"
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Notify Slack (Test failure)
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text": ":x: *Test job* - Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":x: *Test job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                  }
+                },
+                {
+                  "type": "image",
+                  "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/failed.gif?raw=true",
+                  "alt_text": "Failure - Sad cat"
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+  build_and_push_docker:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image-name: ${{ steps.export.outputs.image-name }}
+      image-tag: ${{ steps.export.outputs.image-tag }}
+
+    steps:
+      - name: Notify Slack (Build Start)
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text": ":hammer_and_wrench: *Build Start*",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":hammer_and_wrench: *Build Start*\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                  }
+                },
+                {
+                  "type": "image",
+                  "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/deploying.gif?raw=true",
+                  "alt_text": "Build Start - Deploying"
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=edge
+            type=ref,event=tag
+            type=raw,value=build-${{ github.run_number }}
+            type=sha,format=short,event=branch
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE_PATH }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Export image metadata
+        id: export
+        run: |
+          echo "image-name=${{ env.IMAGE_NAME }}" >> "$GITHUB_OUTPUT"
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "image-tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "image-tag=build-${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Format Docker Tags for Slack
+        if: success()
+        id: format_tags
+        run: |
+          tags="${{ steps.meta.outputs.tags }}"
+          tags="${tags//$'\n'/\\n}"
+          echo "slack-tags=$tags" >> "$GITHUB_OUTPUT"
+
+      - name: Notify Slack (Build and Push Docker Image success)
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text": ":white_check_mark: *Build and Push Docker Image job* - Succeeded",
+                "blocks": [
+                  {
+                    "type": "section",
+                    "text": {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: *Build and Push Docker Image job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n*생성된 태그*:\n${{ steps.format_tags.outputs.slack-tags }}"
+                  }
+                },
+                {
+                    "type": "image",
+                    "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/build_complete.gif?raw=true",
+                    "alt_text": "Success - Thumbs up dog"
+                  }
+                ]
+              }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Notify Slack (Build and Push Docker Image failure)
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text": ":x: *Build and Push Docker Image job* - Failed",
+                "blocks": [
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": ":x: *Build and Push Docker Image job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                    }
+                  },
+                  {
+                    "type": "image",
+                    "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/failed.gif?raw=true",
+                    "alt_text": "Failure - Sad cat"
+                  }
+                ]
+              }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+  notify_slack:
+    name: Notify Slack of Workflow Status
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - test
+      - build_and_push_docker
+    if: always()
+
+    steps:
+      - name: Send final status
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text": ":checkered_flag: *CI/CD 실행 결과*\nBuild: `${{ needs.build.result }}`\nTest: `${{ needs.test.result }}`\nDocker: `${{ needs.build_and_push_docker.result }}`\n"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
