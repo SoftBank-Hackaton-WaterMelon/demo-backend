@@ -62,7 +62,10 @@ jobs:
       - name: 4. Create New Task Definition JSON
         id: create-task-def
         run: |
-          IMAGE_TAG=${{ github.event.inputs.tag }}
+          IMAGE_TAG="${{ github.event.inputs.version }}"
+          if [ -z "$IMAGE_TAG" ]; then
+            IMAGE_TAG="${GITHUB_SHA::7}"
+          fi
           NEW_IMAGE_URI="${{ env.GHCR_IMAGE_URI_BASE }}:$IMAGE_TAG"
           
           echo "🔹 Creating new task definition with image: $NEW_IMAGE_URI"
