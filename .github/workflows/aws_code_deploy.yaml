@@ -44,11 +44,11 @@ jobs:
       - name: 3. Get Current Task Definition
         id: get-task-def
         run: |
-          echo "🔹 Fetching active task definition ARN from service: ${{ env.ECS_SERVICE_NAME }}"
-          TASK_DEF_ARN=$(aws ecs describe-services --cluster ${{ env.ECS_CLUSTER_NAME }} --services ${{ env.ECS_SERVICE_NAME }} --query 'services[0].taskDefinition' --output text)
+          echo "🔹 Fetching active task definition ARN from service: ${{ env.ECS_SERVICE }}"
+          TASK_DEF_ARN=$(aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }} --query 'services[0].taskDefinition' --output text)
           
           if [ -z "$TASK_DEF_ARN" ]; then
-            echo "❌ Error: Could not find task definition for service: ${{ env.ECS_SERVICE_NAME }}"
+            echo "❌ Error: Could not find task definition for service: ${{ env.ECS_SERVICE }}"
             exit 1
           fi
 
@@ -116,7 +116,7 @@ jobs:
           
           aws codedeploy create-deployment \
             --application-name ${{ env.CODEDEPLOY_APP_NAME }} \
-            --deployment-group-name ${{ env.CODEDEPLOY_GROUP_NAME }} \
+            --deployment-group-name ${{ env.CODEDEPLOY_DEPLOYMENT_GROUP }} \
             --revision file://revision.json \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce # 또는 원하는 배포 전략 (예: CodeDeployDefault.ECSCanary10Percent5Minutes)
             
