@@ -1,0 +1,123 @@
+name: AWS CodeDeploy 
+
+on:
+  repository_dispatch:
+    types: [aws_code_deploy]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "deploy"
+        required: false
+        default: "deploy"
+      version:
+        description: "Version (e.g., v1.2.3)"
+        required: false
+
+env:
+  GHCR_IMAGE_URI_BASE: ${{ secrets.GHCR_IMAGE_URI_BASE }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+  CONTAINER_NAME: ${{ secrets.TASK_CONTAINER_NAME }}
+  AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+  CODEDEPLOY_APP_NAME: ${{ secrets.CODEDEPLOY_APP_NAME }}
+  CODEDEPLOY_DEPLOYMENT_GROUP: ${{ secrets.CODEDEPLOY_DEPLOYMENT_GROUP }}
+  APPSPEC_FILE_PATH: appspec.yaml
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 3. Get Current Task Definition
+        id: get-task-def
+        run: |
+          echo "🔹 Fetching active task definition ARN from service: ${{ env.ECS_SERVICE_NAME }}"
+          TASK_DEF_ARN=$(aws ecs describe-services --cluster ${{ env.ECS_CLUSTER_NAME }} --services ${{ env.ECS_SERVICE_NAME }} --query 'services[0].taskDefinition' --output text)
+          
+          if [ -z "$TASK_DEF_ARN" ]; then
+            echo "❌ Error: Could not find task definition for service: ${{ env.ECS_SERVICE_NAME }}"
+            exit 1
+          fi
+
+          echo "Found ARN: $TASK_DEF_ARN"
+          
+          echo "🔹 Fetching full task definition JSON..."
+          aws ecs describe-task-definition --task-definition $TASK_DEF_ARN --query 'taskDefinition' > task-def-base.json
+          
+          echo "task-def-base.json created."
+
+      - name: 4. Create New Task Definition JSON
+        id: create-task-def
+        run: |
+          IMAGE_TAG=${{ github.event.inputs.tag }}
+          NEW_IMAGE_URI="${{ env.GHCR_IMAGE_URI_BASE }}:$IMAGE_TAG"
+          
+          echo "🔹 Creating new task definition with image: $NEW_IMAGE_URI"
+          
+          # jq를 사용하여 컨테이너 이미지 주소를 업데이트하고, register-task-definition에 불필요한 키들(ARN, revision 등)을 제거합니다.
+          jq --arg CONTAINER_NAME "${{ env.CONTAINER_NAME }}" \
+             --arg IMAGE_URI "$NEW_IMAGE_URI" \
+             '(.containerDefinitions[] | select(.name == $CONTAINER_NAME) | .image) = $IMAGE_URI | 
+              del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' \
+             task-def-base.json > task-def-new.json
+
+          echo "task-def-new.json created."
+
+      - name: 5. Register New Task Definition
+        id: register-task-def
+        run: |
+          echo "🔹 Registering new task definition..."
+          NEW_TASK_DEF_JSON=$(aws ecs register-task-definition --cli-input-json file://task-def-new.json)
+          
+          NEW_TASK_DEF_ARN=$(echo $NEW_TASK_DEF_JSON | jq -r '.taskDefinition.taskDefinitionArn')
+          
+          if [ -z "$NEW_TASK_DEF_ARN" ]; then
+            echo "❌ Error: Failed to register new task definition."
+            exit 1
+          fi
+          
+          echo "✅ Successfully registered new task definition: $NEW_TASK_DEF_ARN"
+          echo "NEW_TASK_DEF_ARN=$NEW_TASK_DEF_ARN" >> $GITHUB_OUTPUT
+
+      - name: 6. Create CodeDeploy Revision JSON
+        id: create-revision
+        run: |
+          NEW_TASK_DEF_ARN=${{ steps.register-task-def.outputs.NEW_TASK_DEF_ARN }}
+          
+          echo "🔹 Rendering AppSpec file with new ARN: $NEW_TASK_DEF_ARN"
+          
+          # appspec.yaml 템플릿의 <TASK_DEFINITION_ARN> 플레이스홀더를 실제 ARN으로 교체
+          sed "s|<TASK_DEFINITION_ARN>|$NEW_TASK_DEF_ARN|" ${{ env.APPSPEC_FILE_PATH }} > appspec-rendered.yaml
+          
+          echo "🔹 Creating revision.json for CodeDeploy..."
+          
+          # CodeDeploy create-deployment가 요구하는 revision JSON 포맷 생성
+          # appspec-rendered.yaml 파일의 전체 내용을 문자열로 읽어 JSON 내부에 삽입
+          cat appspec-rendered.yaml | jq -R -s '{revisionType: "AppSpecContent", appSpecContent: {content: .}}' > revision.json
+          
+          echo "revision.json created."
+
+      - name: 7. Start CodeDeploy Deployment
+        run: |
+          echo "🚀 Starting CodeDeploy deployment..."
+          
+          aws codedeploy create-deployment \
+            --application-name ${{ env.CODEDEPLOY_APP_NAME }} \
+            --deployment-group-name ${{ env.CODEDEPLOY_GROUP_NAME }} \
+            --revision file://revision.json \
+            --deployment-config-name CodeDeployDefault.ECSAllAtOnce # 또는 원하는 배포 전략 (예: CodeDeployDefault.ECSCanary10Percent5Minutes)
+            
+          echo "✅ Deployment initiated successfully!"
