@@ -36,7 +36,7 @@ jobs:
         run: npm run lint --if-present
 
       - name: Syntax check
-        run: node --check src/server.js
+        run: node --check src/server.cjs
 
       - name: Notify Slack (Pre-Check success)
         if: success()
