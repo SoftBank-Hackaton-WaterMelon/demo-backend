@@ -1,5 +1,6 @@
 // src/server.js
 const express = require('express')
+const path = require('path')
 const app = express()
 
 // ============================================
@@ -9,36 +10,20 @@ const ENV = process.env.NODE_ENV || 'development'
 const PORT = process.env.PORT || 8080
 const VERSION = process.env.APP_VERSION || '1.0.0'
 
-// ESM 환경용 경로 설정
-const __filename = fileURLToPath(import.meta.url)
+// CommonJS 환경용 경로 설정
 const __dirname = path.dirname(__filename)
 
-//  public 폴더 절대경로 지정
+// public 폴더 절대경로 지정
 const publicPath = path.join(__dirname, '../public')
 
-//  정적 파일 서비스 (이미지, CSS, JS 등)
-app.use(express.static(publicPath))
-
-//  기본 페이지 — dance.html
-app.get('/', (req, res) => {
-  res.sendFile(path.join(publicPath, 'dance.html'))
-})
-
-//  seollem.html 버전 테스트용
-app.get('/seollem', (req, res) => {
-  res.sendFile(path.join(publicPath, 'seollem.html'))
-})
-
 // ============================================
-// Prometheus 메트릭 (간단 버전)
+// Prometheus 메트릭
 // ============================================
 const promClient = require('prom-client')
 const register = new promClient.Registry()
 
-// 기본 메트릭 (CPU, Memory 등)
 promClient.collectDefaultMetrics({ register })
 
-// 에러 카운터
 const errorCounter = new promClient.Counter({
   name: 'app_errors_total',
   help: 'Total errors',
@@ -46,7 +31,6 @@ const errorCounter = new promClient.Counter({
   registers: [register],
 })
 
-// HTTP 요청 카운터
 const httpCounter = new promClient.Counter({
   name: 'http_requests_total',
   help: 'Total HTTP requests',
@@ -54,12 +38,10 @@ const httpCounter = new promClient.Counter({
   registers: [register],
 })
 
-// 요청 지연시간 히스토그램 (라우트/메서드/상태코드 라벨)
 const httpDuration = new promClient.Histogram({
   name: 'http_request_duration_seconds',
   help: 'Duration of HTTP requests in seconds',
   labelNames: ['method', 'route', 'code'],
-  // RED/Apdex 템플릿이 자주 쓰는 버킷 구성
   buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
   registers: [register],
 })
@@ -81,15 +63,15 @@ app.use((req, res, next) => {
 })
 
 // ============================================
-// 에러율 설정 (전역 변수)
+// 에러율 설정
 // ============================================
 let ERROR_RATE = 0.0
 
 // ============================================
-// 엔드포인트
+// 엔드포인트 (순서가 중요!)
 // ============================================
 
-// 1. 헬스체크 (health + healthz 둘 다 지원)
+// 1. 헬스체크 (제일 먼저!)
 app.get(['/health', '/healthz'], (req, res) => {
   res.json({
     status: 'ok',
@@ -99,7 +81,7 @@ app.get(['/health', '/healthz'], (req, res) => {
   })
 })
 
-// 2. 환경 정보
+// 2. API 엔드포인트들
 app.get('/api/info', (req, res) => {
   res.json({
     environment: ENV,
@@ -109,7 +91,6 @@ app.get('/api/info', (req, res) => {
   })
 })
 
-// 3. 에러율 설정 (POST)
 app.post('/error/rate', (req, res) => {
   const rate = parseFloat(req.body.rate)
 
@@ -118,7 +99,7 @@ app.post('/error/rate', (req, res) => {
   }
 
   ERROR_RATE = rate
-  console.log(`🎛️  Error rate: ${(ERROR_RATE * 100).toFixed(1)}%`)
+  console.log(`  Error rate: ${(ERROR_RATE * 100).toFixed(1)}%`)
 
   res.json({
     errorRate: ERROR_RATE,
@@ -126,7 +107,6 @@ app.post('/error/rate', (req, res) => {
   })
 })
 
-// 4. 에러율 조회 (GET)
 app.get('/error/rate', (req, res) => {
   res.json({
     errorRate: ERROR_RATE,
@@ -134,12 +114,9 @@ app.get('/error/rate', (req, res) => {
   })
 })
 
-// 5. 랜덤 에러 테스트
 app.get('/api/test', (req, res) => {
-  // 에러 발생 시뮬레이션
   if (Math.random() < ERROR_RATE) {
     errorCounter.inc({ type: 'random' })
-
     console.error(`❌ Error triggered! (rate: ${ERROR_RATE})`)
 
     return res.status(500).json({
@@ -149,7 +126,6 @@ app.get('/api/test', (req, res) => {
     })
   }
 
-  // 정상 응답
   res.json({
     status: 'success',
     environment: ENV,
@@ -157,7 +133,6 @@ app.get('/api/test', (req, res) => {
   })
 })
 
-// 6. 의도적 500 에러
 app.get('/error/500', (req, res) => {
   errorCounter.inc({ type: '500' })
 
@@ -167,7 +142,6 @@ app.get('/error/500', (req, res) => {
   })
 })
 
-// 7. CPU 부하 (옵션)
 app.get('/error/cpu', (req, res) => {
   const duration = parseInt(req.query.duration) || 3000
   const start = Date.now()
@@ -182,16 +156,16 @@ app.get('/error/cpu', (req, res) => {
   })
 })
 
-// 8. Prometheus 메트릭 (모니터링 담당자가 수집)
+// 3. Prometheus 메트릭
 app.get('/metrics', async (req, res) => {
   res.set('Content-Type', register.contentType)
   res.end(await register.metrics())
 })
 
-// 9. 루트
+// 4. API 루트 (JSON 응답)
 app.get('/api', (req, res) => {
   res.json({
-    message: 'Demo Backend-v2alsdfjalsdkjf',
+    message: 'Demo Backend API',
     environment: ENV,
     version: VERSION,
     endpoints: [
@@ -203,6 +177,29 @@ app.get('/api', (req, res) => {
       'GET  /error/500',
       'GET  /metrics',
     ],
+  })
+})
+
+// 5. Seollem 페이지
+app.get('/seollem', (req, res) => {
+  res.sendFile(path.join(publicPath, 'seollem.html'))
+})
+
+// 6. 정적 파일 서비스 (API보다 나중에!)
+app.use(express.static(publicPath))
+
+// 7. 루트 경로 - dance.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(publicPath, 'dance.html'))
+})
+
+// ============================================
+// 404 핸들러
+// ============================================
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    path: req.path,
   })
 })
 
