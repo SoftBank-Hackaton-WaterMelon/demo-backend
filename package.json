@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "NODE_ENV=development nodemon src/server.js",
-    "staging": "NODE_ENV=staging node src/server.js",
-    "prod": "NODE_ENV=production node src/server.js"
+    "start": "node src/server.cjs",
+    "dev": "NODE_ENV=development nodemon src/server.cjs",
+    "staging": "NODE_ENV=staging node src/server.cjs",
+    "prod": "NODE_ENV=production node src/server.cjs"
   },
   "keywords": [],
   "author": "",

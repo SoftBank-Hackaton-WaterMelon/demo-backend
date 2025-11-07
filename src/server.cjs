@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 8080
 const VERSION = process.env.APP_VERSION || '1.0.0'
 
 // CommonJS 환경용 경로 설정
-const __dirname = path.dirname(__filename)
+// const __dirname = path.dirname(__filename)
 
 // public 폴더 절대경로 지정
 const publicPath = path.join(__dirname, '../public')

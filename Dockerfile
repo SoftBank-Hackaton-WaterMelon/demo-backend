@@ -6,6 +6,7 @@ COPY package*.json ./
 RUN npm ci --production
 
 COPY src ./src
+COPY public ./public
 
 # 빌드 시 환경 설정
 ARG NODE_ENV=production
@@ -20,4 +21,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD node -e "require('http').get('http://localhost:8080/health',(r)=>{process.exit(r.statusCode===200?0:1)})"
 
-CMD ["npm", "start"]
+CMD ["node", "--input-type=commonjs", "src/server.cjs"]
