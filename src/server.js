@@ -59,8 +59,8 @@ let ERROR_RATE = 0.0
 // 엔드포인트
 // ============================================
 
-// 1. 헬스체크 (필수!)
-app.get('/health', (req, res) => {
+// 1. 헬스체크 (health + healthz 둘 다 지원)
+app.get(['/health', '/healthz'], (req, res) => {
   res.json({
     status: 'ok',
     environment: ENV,
