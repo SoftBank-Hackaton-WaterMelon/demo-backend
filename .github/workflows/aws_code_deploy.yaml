@@ -114,7 +114,7 @@ jobs:
         run: |
           echo "🚀 Starting CodeDeploy deployment..."
           
-          aws codedeploy create-deployment \
+          aws deploy create-deployment \
             --application-name ${{ env.CODEDEPLOY_APP_NAME }} \
             --deployment-group-name ${{ env.CODEDEPLOY_DEPLOYMENT_GROUP }} \
             --revision file://revision.json \
