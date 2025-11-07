@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>치이카와 · 댄스 파티</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(
+            1100px 540px at 12% 10%,
+            #22c55e22,
+            transparent
+          ),
+          radial-gradient(900px 520px at 88% 18%, #3b82f622, transparent),
+          linear-gradient(135deg, #3b82f6, #ec4899);
+        font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+          'Noto Sans KR', sans-serif;
+        color: #fff;
+      }
+      .card {
+        width: min(860px, 94vw);
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 22px;
+        padding: 26px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(8px);
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-weight: 900;
+      }
+      p {
+        margin: 0 0 14px;
+        opacity: 0.95;
+      }
+
+      /* 살짝 흔들리는 콘페티(배경) */
+      .confetti {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.8;
+        background-image: radial-gradient(
+            circle at 10% 10%,
+            #fff 0 2px,
+            transparent 3px
+          ),
+          radial-gradient(circle at 50% 20%, #facc15 0 2px, transparent 3px),
+          radial-gradient(circle at 80% 10%, #22d3ee 0 2px, transparent 3px),
+          radial-gradient(circle at 30% 25%, #a3e635 0 2px, transparent 3px),
+          radial-gradient(circle at 60% 30%, #f472b6 0 2px, transparent 3px);
+        animation: confetti 2s linear infinite alternate;
+        z-index: 0;
+      }
+      @keyframes confetti {
+        from {
+          transform: translateY(-5%);
+        }
+        to {
+          transform: translateY(5%);
+        }
+      }
+
+      /* 스테이지 */
+      .stage-wrap {
+        margin-top: 6px;
+        perspective: 1200px;
+      }
+      .stage {
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        box-shadow: 0 0 28px rgba(255, 255, 255, 0.15) inset;
+        background: rgba(0, 0, 0, 0.12);
+        transform-style: preserve-3d;
+        transition: transform 0.12s ease;
+      }
+      /* 애니메이티드 보더 */
+      .stage::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 20px;
+        background: conic-gradient(
+          from 0deg,
+          #22d3ee,
+          #a78bfa,
+          #f472b6,
+          #facc15,
+          #22d3ee
+        );
+        filter: blur(10px);
+        opacity: 0.35;
+        z-index: 0;
+        animation: spin 8s linear infinite;
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        padding: 2px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(1turn);
+        }
+      }
+
+      /* 스포트라이트 */
+      .spot {
+        position: absolute;
+        inset: -20% -10%;
+        z-index: 0;
+        pointer-events: none;
+        background: radial-gradient(
+          60% 60% at var(--mx, 50%) var(--my, 40%),
+          rgba(255, 255, 255, 0.16),
+          transparent 60%
+        );
+        mix-blend-mode: screen;
+        transition: background-position 0.1s ease;
+      }
+
+      /* 메인 이미지 */
+      .img {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: 100%;
+        height: auto;
+        transform-origin: 50% 90%;
+        animation: dance 1.2s ease-in-out infinite;
+        image-rendering: -webkit-optimize-contrast;
+      }
+      @keyframes dance {
+        0% {
+          transform: translateY(0) rotate(0deg) scale(1);
+        }
+        25% {
+          transform: translateY(-6px) rotate(-2deg) scale(1.02);
+        }
+        50% {
+          transform: translateY(0) rotate(0deg) scale(1);
+        }
+        75% {
+          transform: translateY(-6px) rotate(2deg) scale(1.02);
+        }
+        100% {
+          transform: translateY(0) rotate(0deg) scale(1);
+        }
+      }
+
+      /* 자막 */
+      .subtitle {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+        z-index: 3;
+        background: rgba(0, 0, 0, 0.45);
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.95rem;
+        letter-spacing: -0.01em;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+        padding: 8px 12px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+        user-select: none;
+        backdrop-filter: blur(4px);
+      }
+
+      /* 꽃잎 */
+      .petals {
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 2;
+      }
+      .petal {
+        position: absolute;
+        top: -10vh;
+        width: 14px;
+        height: 12px;
+        background: radial-gradient(
+          ellipse at 60% 40%,
+          #f9a8d4 0%,
+          #f472b6 60%,
+          #ec4899 100%
+        );
+        border-radius: 60% 60% 60% 60% / 70% 70% 40% 40%;
+        opacity: 0.95;
+        filter: drop-shadow(0 4px 6px rgba(236, 72, 153, 0.35));
+        transform: rotate(var(--rot));
+        animation: fall linear var(--fall-dur) var(--fall-delay) both,
+          sway ease-in-out var(--sway-dur) var(--sway-delay) infinite alternate;
+      }
+      .petal::after {
+        content: '';
+        position: absolute;
+        inset: 2px 4px auto auto;
+        width: 6px;
+        height: 4px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.55);
+        transform: rotate(-20deg);
+      }
+      @keyframes fall {
+        to {
+          transform: translateY(110vh) rotate(calc(var(--rot) + 160deg));
+        }
+      }
+      @keyframes sway {
+        from {
+          translate: 0 0;
+        }
+        to {
+          translate: var(--sway-x, 32px) 8px;
+        }
+      }
+
+      /* 모션 최소화 */
+      @media (prefers-reduced-motion: reduce) {
+        .img,
+        .confetti,
+        .stage::before,
+        .petal {
+          animation: none !important;
+        }
+      }
+
+      .controls {
+        margin-top: 14px;
+        display: grid;
+        gap: 10px;
+        justify-content: center;
+      }
+      .rows {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      button,
+      .chip {
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        color: #000;
+        background: #22d3ee;
+        border-radius: 999px;
+        padding: 10px 16px;
+        cursor: pointer;
+        transition: transform 0.05s ease, background 0.2s ease,
+          border-color 0.2s ease;
+        font-weight: 700;
+      }
+      button:hover,
+      .chip:hover {
+        background: #67e8f9;
+      }
+      button:active,
+      .chip:active {
+        transform: translateY(1px);
+      }
+      #status {
+        font-size: 0.95rem;
+        opacity: 0.95;
+        color: #fff;
+      }
+      input[type='range'] {
+        width: min(420px, 70vw);
+        accent-color: #22d3ee;
+      }
+      .chip {
+        background: rgba(34, 211, 238, 0.18);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.28);
+      }
+
+      .footer {
+        opacity: 0.9;
+        font-size: 0.9rem;
+        margin-top: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card" id="root">
+      <div class="confetti" aria-hidden="true"></div>
+      <h1>ちいかわ、わくわくな一日! 🎉</h1>
+
+      <div class="stage-wrap">
+        <div class="stage" id="stage" aria-label="춤추는 치이카와 이미지">
+          <div class="spot" aria-hidden="true"></div>
+
+          <!-- 꽃잎 -->
+          <div class="petals" aria-hidden="true"></div>
+
+          <!-- 메인 이미지 -->
+          <img
+            class="img"
+            src="assets/dance.gif"
+            alt="ちいかわ、わくわくな一日！"
+            loading="eager"
+            onerror="this.onerror=null; this.src='assets/dance.jpg'; this.onerror=function(){ this.src='assets/dance.png'; };"
+          />
+
+          <!-- 자막 (순환) -->
+          <span class="subtitle" id="subtitle" aria-live="polite"
+            >今日はじしんをもって！ ✨</span
+          >
+        </div>
+      </div>
+
+      <div class="controls" role="group" aria-label="오디오 및 효과 제어">
+        <div class="rows">
+          <button id="play" aria-label="배경음악 재생">▶ 음악 켜기</button>
+          <button id="pause" aria-label="배경음악 일시정지">⏸ 일시정지</button>
+          <button id="togglePetals" class="chip" aria-pressed="true">
+            🌸 꽃비 ON
+          </button>
+        </div>
+
+        <input
+          id="seek"
+          type="range"
+          min="0"
+          max="1000"
+          value="0"
+          aria-label="재생 위치"
+        />
+        <div class="rows">
+          <label class="chip" style="padding: 8px 12px">
+            🔊 볼륨
+            <input
+              id="vol"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.8"
+              style="vertical-align: middle; width: 160px; margin-left: 8px"
+            />
+          </label>
+          <span id="status">정지됨</span>
+        </div>
+        <div class="footer">
+          단축키: Space(재생/일시정지), ←/→(5초 이동), ↑/↓(볼륨)
+        </div>
+      </div>
+
+      <audio id="bgm" preload="auto" loop>
+        <source src="assets/dance.mp3" type="audio/mpeg" />
+        <source src="assets/dance.m4a" type="audio/mp4" />
+        <source src="assets/dance.ogg" type="audio/ogg" />
+      </audio>
+    </main>
+
+    <script>
+      // ===== 엘리먼트 =====
+      const audio = document.getElementById('bgm')
+      const statusEl = document.getElementById('status')
+      const seek = document.getElementById('seek')
+      const vol = document.getElementById('vol')
+      const playBtn = document.getElementById('play')
+      const pauseBtn = document.getElementById('pause')
+      const stage = document.getElementById('stage')
+      const subtitle = document.getElementById('subtitle')
+      const spot = document.querySelector('.spot')
+      const petalsLayer = document.querySelector('.petals')
+      const togglePetalsBtn = document.getElementById('togglePetals')
+
+      // ===== 상태 복원 =====
+      const saved = JSON.parse(localStorage.getItem('dance:state') || '{}')
+      audio.volume = saved.volume ?? 0.8
+      vol.value = audio.volume
+      let captionIndex = saved.captionIndex ?? 0
+      let petalsOn = saved.petalsOn ?? true
+      togglePetalsBtn.setAttribute('aria-pressed', petalsOn)
+      petalsLayer.style.display = petalsOn ? '' : 'none'
+
+      // ===== 오디오 제어 =====
+      const updateStatus = (txt) => (statusEl.textContent = txt)
+
+      playBtn.addEventListener('click', async () => {
+        try {
+          await audio.play()
+          updateStatus('재생 중')
+        } catch {
+          updateStatus('재생 실패(첫 상호작용 필요/파일 없음)')
+        }
+      })
+      pauseBtn.addEventListener('click', () => {
+        audio.pause()
+        updateStatus('일시정지')
+      })
+
+      // 첫 사용자 제스처 시 자동 언락 시도(모바일 등 대비)
+      document.addEventListener(
+        'pointerdown',
+        async () => {
+          if (audio.paused) {
+            try {
+              await audio.play()
+              updateStatus('재생 중')
+            } catch {}
+          }
+        },
+        { once: true }
+      )
+
+      vol.addEventListener('input', () => {
+        audio.volume = Number(vol.value)
+        persist()
+      })
+
+      audio.addEventListener('timeupdate', () => {
+        if (audio.duration)
+          seek.value = Math.floor((audio.currentTime / audio.duration) * 1000)
+      })
+      seek.addEventListener('input', () => {
+        if (audio.duration)
+          audio.currentTime = (seek.value / 1000) * audio.duration
+      })
+
+      // ===== 단축키 =====
+      document.addEventListener('keydown', (e) => {
+        if (
+          ['INPUT', 'TEXTAREA', 'SELECT'].includes(
+            document.activeElement.tagName
+          )
+        )
+          return
+        if (e.code === 'Space') {
+          e.preventDefault()
+          audio.paused ? audio.play() : audio.pause()
+        }
+        if (e.code === 'ArrowLeft')
+          audio.currentTime = Math.max(0, audio.currentTime - 5)
+        if (e.code === 'ArrowRight')
+          audio.currentTime = Math.min(
+            audio.duration || 0,
+            audio.currentTime + 5
+          )
+        if (e.code === 'ArrowUp') {
+          audio.volume = Math.min(1, audio.volume + 0.05)
+          vol.value = audio.volume
+          persist()
+        }
+        if (e.code === 'ArrowDown') {
+          audio.volume = Math.max(0, audio.volume - 0.05)
+          vol.value = audio.volume
+          persist()
+        }
+      })
+
+      // ===== 마우스 스포트라이트 & 틸트 =====
+      stage.addEventListener('pointermove', (e) => {
+        const rect = stage.getBoundingClientRect()
+        const x = ((e.clientX - rect.left) / rect.width) * 100
+        const y = ((e.clientY - rect.top) / rect.height) * 100
+        spot.style.setProperty('--mx', x + '%')
+        spot.style.setProperty('--my', y + '%')
+
+        const rx = (0.5 - y / 100) * 6 // X축 기울기
+        const ry = (x / 100 - 0.5) * 6 // Y축 기울기
+        stage.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`
+      })
+      stage.addEventListener('pointerleave', () => {
+        stage.style.transform = 'rotateX(0deg) rotateY(0deg)'
+      })
+
+      // ===== 자막 로테이션 =====
+      const lines = [
+        '今日はじしんをもって！ ✨',
+        'ちいかわ、わくわく！ 💫',
+        '오늘도 설레는 하루가 될 거야! 🌸',
+        '自分を信じて、ファイト！ 💪',
+        '작은 한 걸음, 큰 기쁨 ✨',
+      ]
+      function rotateSubtitle() {
+        captionIndex = (captionIndex + 1) % lines.length
+        subtitle.textContent = lines[captionIndex]
+        persist()
+      }
+      setInterval(rotateSubtitle, 3200)
+
+      // ===== 꽃잎 토글 & 생성 =====
+      togglePetalsBtn.addEventListener('click', () => {
+        petalsOn = !petalsOn
+        togglePetalsBtn.setAttribute('aria-pressed', petalsOn)
+        petalsLayer.style.display = petalsOn ? '' : 'none'
+        persist()
+      })
+
+      const rnd = (min, max) => Math.random() * (max - min) + min
+      const PETAL_COUNT = 20
+
+      function spawnPetals() {
+        petalsLayer.innerHTML = ''
+        for (let i = 0; i < PETAL_COUNT; i++) {
+          const p = document.createElement('span')
+          p.className = 'petal'
+          p.style.left = rnd(0, 100) + 'vw'
+          const speed = rnd(7, 13)
+          p.style.setProperty('--fall-dur', speed + 's')
+          p.style.setProperty('--fall-delay', rnd(-speed, 0) + 's')
+          p.style.setProperty('--sway-dur', rnd(2.4, 5.0) + 's')
+          p.style.setProperty('--sway-delay', rnd(0, 2) + 's')
+          p.style.setProperty('--sway-x', rnd(18, 44) + 'px')
+          p.style.setProperty('--rot', rnd(-40, 40) + 'deg')
+          petalsLayer.appendChild(p)
+        }
+      }
+      spawnPetals()
+
+      // ===== 상태 저장 =====
+      function persist() {
+        localStorage.setItem(
+          'dance:state',
+          JSON.stringify({
+            volume: audio.volume,
+            captionIndex,
+            petalsOn,
+          })
+        )
+      }
+
+      audio.addEventListener('play', () => updateStatus('재생 중'))
+      audio.addEventListener('pause', () => updateStatus('일시정지'))
+      audio.addEventListener('ended', () => updateStatus('정지됨'))
+    </script>
+  </body>
+</html>

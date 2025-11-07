@@ -9,6 +9,26 @@ const ENV = process.env.NODE_ENV || 'development'
 const PORT = process.env.PORT || 8080
 const VERSION = process.env.APP_VERSION || '1.0.0'
 
+// ESM 환경용 경로 설정
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+//  public 폴더 절대경로 지정
+const publicPath = path.join(__dirname, '../public')
+
+//  정적 파일 서비스 (이미지, CSS, JS 등)
+app.use(express.static(publicPath))
+
+//  기본 페이지 — dance.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(publicPath, 'dance.html'))
+})
+
+//  seollem.html 버전 테스트용
+app.get('/seollem', (req, res) => {
+  res.sendFile(path.join(publicPath, 'seollem.html'))
+})
+
 // ============================================
 // Prometheus 메트릭 (간단 버전)
 // ============================================
@@ -169,7 +189,7 @@ app.get('/metrics', async (req, res) => {
 })
 
 // 9. 루트
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.json({
     message: 'Demo Backend-v2alsdfjalsdkjf',
     environment: ENV,

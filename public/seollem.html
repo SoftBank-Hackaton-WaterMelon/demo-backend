@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>치이카와 · 설렘</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(180deg, #fce7f3 0%, #f9a8d4 100%);
+        font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+          'Noto Sans KR', sans-serif;
+        color: #4b5563;
+      }
+      .card {
+        width: min(760px, 92vw);
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 26px;
+        padding: 24px;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 20px 40px rgba(219, 39, 119, 0.18),
+          0 4px 14px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-weight: 900;
+        color: #db2777;
+        letter-spacing: -0.02em;
+      }
+      p {
+        margin: 0 0 14px;
+      }
+
+      /* 프레임 */
+      .frame-wrap {
+        margin-top: 4px;
+      }
+      .frame {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        background: #fff;
+        box-shadow: 0 0 26px rgba(219, 39, 119, 0.2) inset;
+        isolation: isolate;
+      }
+      /* 은은한 반짝 테두리 */
+      .frame::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 22px;
+        z-index: 0;
+        background: conic-gradient(
+          from 0deg,
+          #f472b6,
+          #a78bfa,
+          #facc15,
+          #22d3ee,
+          #f472b6
+        );
+        filter: blur(10px);
+        opacity: 0.28;
+        animation: ring 9s linear infinite;
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        padding: 2px;
+        pointer-events: none;
+      }
+      @keyframes ring {
+        to {
+          transform: rotate(1turn);
+        }
+      }
+
+      /* 스포트라이트 */
+      .spot {
+        position: absolute;
+        inset: -10% -5%;
+        z-index: 0;
+        pointer-events: none;
+        background: radial-gradient(
+          55% 55% at var(--mx, 50%) var(--my, 45%),
+          rgba(255, 255, 255, 0.35),
+          transparent 60%
+        );
+        mix-blend-mode: screen;
+        transition: background-position 0.08s ease;
+      }
+
+      .img {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      /* 자막(캡션) */
+      .subtitle {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+        z-index: 2;
+        background: rgba(255, 255, 255, 0.88);
+        color: #db2777;
+        font-weight: 800;
+        font-size: 0.98rem;
+        letter-spacing: -0.01em;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 999px;
+        padding: 8px 12px;
+        box-shadow: 0 6px 14px rgba(219, 39, 119, 0.18);
+        user-select: none;
+      }
+
+      /* 모션 최소화 */
+      @media (prefers-reduced-motion: reduce) {
+        .frame::before {
+          animation: none !important;
+        }
+      }
+
+      /* 컨트롤 */
+      .controls {
+        margin-top: 14px;
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+      }
+      .rows {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      button,
+      .chip {
+        appearance: none;
+        border: 0;
+        color: #fff;
+        background: #ec4899;
+        border-radius: 999px;
+        padding: 10px 16px;
+        cursor: pointer;
+        transition: transform 0.05s ease, background 0.2s ease;
+        font-weight: 800;
+      }
+      button:hover,
+      .chip:hover {
+        background: #db2777;
+      }
+      button:active,
+      .chip:active {
+        transform: translateY(1px);
+      }
+      .chip {
+        background: rgba(236, 72, 153, 0.18);
+        color: #db2777;
+        border: 1px solid rgba(219, 39, 119, 0.35);
+      }
+      #status {
+        font-size: 0.95rem;
+        opacity: 0.9;
+        color: #6b7280;
+      }
+      input[type='range'] {
+        width: min(420px, 72vw);
+        accent-color: #ec4899;
+      }
+
+      .footer {
+        opacity: 0.9;
+        font-size: 0.9rem;
+        margin-top: 4px;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card" id="root">
+      <h1>ちいかわのドキドキな一日 🌸</h1>
+
+      <div class="frame-wrap">
+        <div class="frame" id="frame" aria-label="설레는 치이카와 이미지">
+          <div class="spot" aria-hidden="true"></div>
+
+          <!-- 메인 이미지 -->
+          <img
+            class="img"
+            src="assets/seollem.gif"
+            alt="ちいかわのドキドキな一日"
+            onerror="this.onerror=null; this.src='assets/seollem.jpg'; this.onerror=function(){ this.src='assets/seollem.png'; };"
+          />
+
+          <!-- 자막(순환) -->
+          <span class="subtitle" id="subtitle" aria-live="polite"
+            >今日もときめく一日になるよ！</span
+          >
+        </div>
+      </div>
+
+      <div class="controls" role="group" aria-label="오디오 및 효과 제어">
+        <div class="rows">
+          <button id="play" aria-label="배경음악 재생">▶ 음악 켜기</button>
+          <button id="pause" aria-label="배경음악 일시정지">⏸ 일시정지</button>
+        </div>
+
+        <input
+          id="seek"
+          type="range"
+          min="0"
+          max="1000"
+          value="0"
+          aria-label="재생 위치"
+        />
+        <div class="rows">
+          <label class="chip" style="padding: 8px 12px">
+            🔊 볼륨
+            <input
+              id="vol"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.8"
+              style="vertical-align: middle; width: 160px; margin-left: 8px"
+            />
+          </label>
+          <span id="status">정지됨</span>
+        </div>
+        <div class="footer">
+          단축키: Space(재생/일시정지), ←/→(5초 이동), ↑/↓(볼륨)
+        </div>
+      </div>
+
+      <audio id="bgm" preload="auto" loop>
+        <source src="assets/seollem.mp3" type="audio/mpeg" />
+        <source src="assets/seollem.m4a" type="audio/mp4" />
+        <source src="assets/seollem.ogg" type="audio/ogg" />
+      </audio>
+    </main>
+
+    <script>
+      // ===== 엘리먼트 =====
+      const audio = document.getElementById('bgm')
+      const statusEl = document.getElementById('status')
+      const seek = document.getElementById('seek')
+      const vol = document.getElementById('vol')
+      const playBtn = document.getElementById('play')
+      const pauseBtn = document.getElementById('pause')
+      const subtitle = document.getElementById('subtitle')
+      const frame = document.getElementById('frame')
+      const spot = document.querySelector('.spot')
+
+      // ===== 상태 복원 =====
+      const saved = JSON.parse(localStorage.getItem('seollem:state') || '{}')
+      audio.volume = saved.volume ?? 0.8
+      vol.value = audio.volume
+      let captionIndex = saved.captionIndex ?? 0
+
+      // ===== 오디오 제어 =====
+      const updateStatus = (txt) => (statusEl.textContent = txt)
+
+      playBtn.addEventListener('click', async () => {
+        try {
+          await audio.play()
+          updateStatus('재생 중')
+        } catch {
+          updateStatus('재생 실패(첫 상호작용 필요/파일 없음)')
+        }
+      })
+      pauseBtn.addEventListener('click', () => {
+        audio.pause()
+        updateStatus('일시정지')
+      })
+
+      document.addEventListener(
+        'pointerdown',
+        async () => {
+          if (audio.paused) {
+            try {
+              await audio.play()
+              updateStatus('재생 중')
+            } catch {}
+          }
+        },
+        { once: true }
+      )
+
+      vol.addEventListener('input', () => {
+        audio.volume = Number(vol.value)
+        persist()
+      })
+
+      audio.addEventListener('timeupdate', () => {
+        if (audio.duration)
+          seek.value = Math.floor((audio.currentTime / audio.duration) * 1000)
+      })
+      seek.addEventListener('input', () => {
+        if (audio.duration)
+          audio.currentTime = (seek.value / 1000) * audio.duration
+      })
+
+      // ===== 단축키 =====
+      document.addEventListener('keydown', (e) => {
+        if (
+          ['INPUT', 'TEXTAREA', 'SELECT'].includes(
+            document.activeElement.tagName
+          )
+        )
+          return
+        if (e.code === 'Space') {
+          e.preventDefault()
+          audio.paused ? audio.play() : audio.pause()
+        }
+        if (e.code === 'ArrowLeft')
+          audio.currentTime = Math.max(0, audio.currentTime - 5)
+        if (e.code === 'ArrowRight')
+          audio.currentTime = Math.min(
+            audio.duration || 0,
+            audio.currentTime + 5
+          )
+        if (e.code === 'ArrowUp') {
+          audio.volume = Math.min(1, audio.volume + 0.05)
+          vol.value = audio.volume
+          persist()
+        }
+        if (e.code === 'ArrowDown') {
+          audio.volume = Math.max(0, audio.volume - 0.05)
+          vol.value = audio.volume
+          persist()
+        }
+      })
+
+      // ===== 스포트라이트(마우스) =====
+      frame.addEventListener('pointermove', (e) => {
+        const rect = frame.getBoundingClientRect()
+        const x = ((e.clientX - rect.left) / rect.width) * 100
+        const y = ((e.clientY - rect.top) / rect.height) * 100
+        spot.style.setProperty('--mx', x + '%')
+        spot.style.setProperty('--my', y + '%')
+      })
+
+      // ===== 자막 로테이션 =====
+      const lines = [
+        '今日もときめく一日になるよ！',
+        '小さな一歩、やさしいトキメキ ✨',
+        '오늘도 설레는 하루가 될 거야! 🌸',
+        '마음이 말해줘, 괜찮다고. 💗',
+        '自分を信じて、すこしずつ。',
+      ]
+      function rotateSubtitle() {
+        captionIndex = (captionIndex + 1) % lines.length
+        subtitle.textContent = lines[captionIndex]
+        persist()
+      }
+      setInterval(rotateSubtitle, 3200)
+
+      // ===== 상태 저장 =====
+      function persist() {
+        localStorage.setItem(
+          'seollem:state',
+          JSON.stringify({
+            volume: audio.volume,
+            captionIndex,
+          })
+        )
+      }
+      audio.addEventListener('play', () => updateStatus('재생 중'))
+      audio.addEventListener('pause', () => updateStatus('일시정지'))
+      audio.addEventListener('ended', () => updateStatus('정지됨'))
+    </script>
+  </body>
+</html>
