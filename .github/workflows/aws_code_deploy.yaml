@@ -21,6 +21,7 @@ env:
   CONTAINER_NAME: ${{ secrets.TASK_CONTAINER_NAME }}
   CODEDEPLOY_APP_NAME: ${{ secrets.CODEDEPLOY_APP_NAME }}
   CODEDEPLOY_DEPLOYMENT_GROUP: ${{ secrets.CODEDEPLOY_DEPLOYMENT_GROUP }}
+  tag: ${{ github.event.client_payload.message || 'latest' }}
   APPSPEC_FILE_PATH: appspec.yaml
 
 permissions:
@@ -62,7 +63,7 @@ jobs:
       - name: 4. Create New Task Definition JSON
         id: create-task-def
         run: |
-          IMAGE_TAG="${{ github.event.inputs.version }}"
+          IMAGE_TAG="${{ env.tag }}"
           if [ -z "$IMAGE_TAG" ]; then
             IMAGE_TAG="${GITHUB_SHA::7}"
           fi
