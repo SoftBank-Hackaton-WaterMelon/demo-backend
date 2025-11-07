@@ -181,16 +181,16 @@ app.get('/api', (req, res) => {
 })
 
 // 5. Seollem 페이지
-app.get('/seollem', (req, res) => {
-  res.sendFile(path.join(publicPath, 'seollem.html'))
-})
+// app.get('/seollem', (req, res) => {
+//   res.sendFile(path.join(publicPath, 'seollem.html'))
+// })
 
 // 6. 정적 파일 서비스 (API보다 나중에!)
 app.use(express.static(publicPath))
 
 // 7. 루트 경로 - dance.html
 app.get('/', (req, res) => {
-  res.sendFile(path.join(publicPath, 'dance.html'))
+  res.sendFile(path.join(publicPath, 'seollem.html'))
 })
 
 // ============================================
