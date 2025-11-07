@@ -19,7 +19,6 @@ env:
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
   CONTAINER_NAME: ${{ secrets.TASK_CONTAINER_NAME }}
-  AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
   CODEDEPLOY_APP_NAME: ${{ secrets.CODEDEPLOY_APP_NAME }}
   CODEDEPLOY_DEPLOYMENT_GROUP: ${{ secrets.CODEDEPLOY_DEPLOYMENT_GROUP }}
   APPSPEC_FILE_PATH: appspec.yaml
@@ -35,10 +34,11 @@ jobs:
       - name: 1. Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 2. Configure AWS Credentials (OIDC)
+      - name: 2. Configure AWS Credentials (Access Key)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: 3. Get Current Task Definition
