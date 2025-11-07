@@ -34,6 +34,16 @@ const httpCounter = new promClient.Counter({
   registers: [register],
 })
 
+// 요청 지연시간 히스토그램 (라우트/메서드/상태코드 라벨)
+const httpDuration = new promClient.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'code'],
+  // RED/Apdex 템플릿이 자주 쓰는 버킷 구성
+  buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
+  registers: [register],
+})
+
 // ============================================
 // 미들웨어
 // ============================================
