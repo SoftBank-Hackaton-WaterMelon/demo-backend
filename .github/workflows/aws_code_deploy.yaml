@@ -2,7 +2,7 @@ name: AWS CodeDeploy
 
 on:
   repository_dispatch:
-    types: [aws_code_deploy]
+    types: [dev_deploy]
   workflow_dispatch:
     inputs:
       action:
