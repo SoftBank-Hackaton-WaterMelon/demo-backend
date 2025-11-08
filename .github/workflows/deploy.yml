@@ -40,55 +40,51 @@ jobs:
 
       - name: Notify Slack (Pre-Check success)
         if: success()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          payload: |
-            {
-              "text": ":white_check_mark: *Pre-Check job* - Succeeded",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":white_check_mark: *Pre-Check job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
-                  }
-                },
-                {
-                  "type": "image",
-                  "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/task_start.gif?raw=true",
-                  "alt_text": "Success - Thumbs up dog"
-                }
-              ]
-            }
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload='{
+            "text": ":white_check_mark: *Pre-Check job* - Succeeded",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":white_check_mark: *Pre-Check job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                }
+              },
+              {
+                "type": "image",
+                "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/task_start.gif?raw=true",
+                "alt_text": "Success - Thumbs up dog"
+              }
+            ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
 
       - name: Notify Slack (Pre-Check failure)
         if: failure()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          payload: |
-            {
-              "text": ":x: *Pre-Check job* - Failed",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":x: *Pre-Check job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
-                  }
-                },
-                {
-                  "type": "image",
-                  "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/failed.gif?raw=true",
-                  "alt_text": "Failure - Sad cat"
-                }
-              ]
-            }
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload='{
+            "text": ":x: *Pre-Check job* - Failed",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":x: *Pre-Check job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                }
+              },
+              {
+                "type": "image",
+                "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/failed.gif?raw=true",
+                "alt_text": "Failure - Sad cat"
+              }
+            ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
 
   test:
     name: Test
@@ -113,55 +109,51 @@ jobs:
 
       - name: Notify Slack (Test success)
         if: success()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          payload: |
-            {
-              "text": ":white_check_mark: *Test job* - Succeeded",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":white_check_mark: *Test job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
-                  }
-                },
-                {
-                  "type": "image",
-                  "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/building.gif?raw=true",
-                  "alt_text": "Success - Thumbs up dog"
-                }
-              ]
-            }
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload='{
+            "text": ":white_check_mark: *Test job* - Succeeded",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":white_check_mark: *Test job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                }
+              },
+              {
+                "type": "image",
+                "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/building.gif?raw=true",
+                "alt_text": "Success - Thumbs up dog"
+              }
+            ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
 
       - name: Notify Slack (Test failure)
         if: failure()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          payload: |
-            {
-              "text": ":x: *Test job* - Failed",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":x: *Test job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
-                  }
-                },
-                {
-                  "type": "image",
-                  "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/failed.gif?raw=true",
-                  "alt_text": "Failure - Sad cat"
-                }
-              ]
-            }
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload='{
+            "text": ":x: *Test job* - Failed",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":x: *Test job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                }
+              },
+              {
+                "type": "image",
+                "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/failed.gif?raw=true",
+                "alt_text": "Failure - Sad cat"
+              }
+            ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
 
   build_and_push_docker:
     name: Build and Push Docker Image
@@ -176,30 +168,28 @@ jobs:
 
     steps:
       - name: Notify Slack (Build Start)
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          payload: |
-            {
-              "text": ":hammer_and_wrench: *Build Start*",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":hammer_and_wrench: *Build Start*\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
-                  }
-                },
-                {
-                  "type": "image",
-                  "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/deploying.gif?raw=true",
-                  "alt_text": "Build Start - Deploying"
-                }
-              ]
-            }
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload='{
+            "text": ":hammer_and_wrench: *Build Start*",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":hammer_and_wrench: *Build Start*\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                }
+              },
+              {
+                "type": "image",
+                "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/deploying.gif?raw=true",
+                "alt_text": "Build Start - Deploying"
+              }
+            ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
+          
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -251,55 +241,51 @@ jobs:
 
       - name: Notify Slack (Build and Push Docker Image success)
         if: success()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          payload: |
-            {
-              "text": ":white_check_mark: *Build and Push Docker Image job* - Succeeded",
-                "blocks": [
-                  {
-                    "type": "section",
-                    "text": {
-                    "type": "mrkdwn",
-                    "text": ":white_check_mark: *Build and Push Docker Image job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n*생성된 태그*:\n${{ steps.format_tags.outputs.slack-tags }}"
-                  }
-                },
-                {
-                    "type": "image",
-                    "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/build_complete.gif?raw=true",
-                    "alt_text": "Success - Thumbs up dog"
-                  }
-                ]
-              }
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload='{
+            "text": ":white_check_mark: *Build and Push Docker Image job* - Succeeded",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":white_check_mark: *Build and Push Docker Image job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n*생성된 태그*:\n${{ steps.format_tags.outputs.slack-tags }}"
+                }
+              },
+              {
+                "type": "image",
+                "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/build_complete.gif?raw=true",
+                "alt_text": "Success - Thumbs up dog"
+              }
+            ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
 
       - name: Notify Slack (Build and Push Docker Image failure)
         if: failure()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          payload: |
-            {
-              "text": ":x: *Build and Push Docker Image job* - Failed",
-                "blocks": [
-                  {
-                    "type": "section",
-                    "text": {
-                      "type": "mrkdwn",
-                      "text": ":x: *Build and Push Docker Image job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
-                    }
-                  },
-                  {
-                    "type": "image",
-                    "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/failed.gif?raw=true",
-                    "alt_text": "Failure - Sad cat"
-                  }
-                ]
-              }
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload='{
+            "text": ":x: *Build and Push Docker Image job* - Failed",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":x: *Build and Push Docker Image job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                }
+              },
+              {
+                "type": "image",
+                "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/failed.gif?raw=true",
+                "alt_text": "Failure - Sad cat"
+              }
+            ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
 
   notify_slack:
     name: Notify Slack of Workflow Status
@@ -308,16 +294,14 @@ jobs:
       - build
       - test
       - build_and_push_docker
-    if: always()
+    if: always() # 항상 실행되도록 보장
 
     steps:
       - name: Send final status
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          payload: |
-            {
-              "text": ":checkered_flag: *CI/CD 실행 결과*\nBuild: `${{ needs.build.result }}`\nTest: `${{ needs.test.result }}`\nDocker: `${{ needs.build_and_push_docker.result }}`\n"
-            }
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload='{
+            "text": ":checkered_flag: *CI/CD 실행 결과*\nBuild: `${{ needs.build.result }}`\nTest: `${{ needs.test.result }}`\nDocker: `${{ needs.build_and_push_docker.result }}`\n"
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
