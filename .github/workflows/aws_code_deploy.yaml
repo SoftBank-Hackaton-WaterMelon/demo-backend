@@ -137,7 +137,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ":white_check_mark: 배포 작업이 시작되었습니다. 배포 상태는 AWS CodeDeploy 콘솔에서 확인할 수 있습니다."
+                    "text": ":white_check_mark: 배포 작업이 시작되었습니다. 배포 상태는 AWS CodeDeploy 콘솔에서 확인할 수 있습니다.\n\n배포가 시작됐어요~\n「デプロイが始まりました〜！」"
                   }
                 },
                 {
