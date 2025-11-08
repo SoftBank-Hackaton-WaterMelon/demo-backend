@@ -1,4 +1,4 @@
-// src/server.js
+// src/server.cjs
 const express = require('express')
 const path = require('path')
 const app = express()
