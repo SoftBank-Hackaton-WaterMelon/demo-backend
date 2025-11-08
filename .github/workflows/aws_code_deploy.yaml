@@ -125,3 +125,26 @@ jobs:
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce # 또는 원하는 배포 전략 (예: CodeDeployDefault.ECSCanary10Percent5Minutes)
             
           echo "✅ Deployment initiated successfully!"
+      - name: Notify Slack (AWS deployment created)
+        if: success()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload='{
+            "text": ":white_check_mark: *AWS deployment created* - Succeeded",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: 배포 작업이 시작되었습니다. 배포 상태는 AWS CodeDeploy 콘솔에서 확인할 수 있습니다."
+                  }
+                },
+                {
+                  "type": "image",
+                  "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/chiikawa-marshmallow.gif?raw=true",
+                  "alt_text": "Success - Thumbs up dog"
+                }
+              ]
+            }'
+            curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
