@@ -50,7 +50,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":white_check_mark: *Pre-Check job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                  "text": ":white_check_mark: *Pre-Check job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n\n후후, 준비는 완벽해요! 🌟 코드에 이상 없는지 먼저 살펴볼게요.\n「ふふっ、準備はばっちりです!🌟 コードに問題がないか、まずチェックしますね。」"
                 }
               },
               {
@@ -74,7 +74,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":x: *Pre-Check job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                  "text": ":x: *Pre-Check job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n\n아이고, 코드에 이상이 있는 것 같아요. 먼저 수정해주세요.\n「あれれ、コードに問題があるようですね。まず修正してください。」"
                 }
               },
               {
@@ -119,7 +119,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":white_check_mark: *Test job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                  "text": ":white_check_mark: *Test job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n\n테스트 통과~! 🎶 이제 자신 있게 빌드할 수 있겠어요.\n「テスト合格〜!🎶 これで自信をもってビルドできます！」"
                 }
               },
               {
@@ -143,7 +143,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":x: *Test job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                  "text": ":x: *Test job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n\n아이고, 테스트에서 이상이 있는 것 같아요. 먼저 수정해주세요.\n「あれれ、テストで問題があるようですね。まず修正してください。」"
                 }
               },
               {
@@ -178,7 +178,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":hammer_and_wrench: *Build Start*\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                  "text": ":hammer_and_wrench: *Build Start*\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n\n이제 진짜 빌드 시작이에요! 💪 이미지 하나하나 정성껏 만드는 중...\n「いよいよビルド開始です！💪 一つひとつのイメージを心をこめて作っています…」"
                 }
               },
               {
@@ -251,7 +251,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":white_check_mark: *Build and Push Docker Image job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n*생성된 태그*:\n${{ steps.format_tags.outputs.slack-tags }}"
+                  "text": ":white_check_mark: *Build and Push Docker Image job* - `Succeeded`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n*생성된 태그*:\n${{ steps.format_tags.outputs.slack-tags }}\n\n완성된 이미지를 리포지토리에 푸쉬 중이에요! 🚀 잠깐만 기다려주세요~\n「完成したイメージをリポジトリにプッシュ中です！🚀 もう少しだけ待っててくださいね〜」"
                 }
               },
               {
@@ -275,7 +275,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":x: *Build and Push Docker Image job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`"
+                  "text": ":x: *Build and Push Docker Image job* - `Failed`\n*브랜치/태그*: `${{ github.ref_name }}`\n*커밋*: `${{ github.sha }}`\n\n아이고, 이미지 빌드에서 이상이 있는 것 같아요. 먼저 수정해주세요.\n「あれれ、イメージビルドで問題があるようですね。まず修正してください。」"
                 }
               },
               {
@@ -302,6 +302,20 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           payload='{
-            "text": ":checkered_flag: *CI/CD 실행 결과*\nBuild: `${{ needs.build.result }}`\nTest: `${{ needs.test.result }}`\nDocker: `${{ needs.build_and_push_docker.result }}`\n"
+            "text": ":checkered_flag: *CI/CD 실행 결과*\nBuild: `${{ needs.build.result }}`\nTest: `${{ needs.test.result }}`\nDocker: `${{ needs.build_and_push_docker.result }}`\n",
+              "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "모든 단계가 성공이에요! 코드도, 빌드도, 도커도 완벽✨\n「すべてのステップが成功です！✨ コードも、ビルドも、ドッカーも完璧！」"
+                }
+              },
+              {
+                "type": "image",
+                "image_url": "https://github.com/SoftBank-Hackaton-WaterMelon/Chiikawa/blob/main/ci_done.gif?raw=true",
+                "alt_text": "Failure - Sad cat"
+              }
+            ]
           }'
           curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
