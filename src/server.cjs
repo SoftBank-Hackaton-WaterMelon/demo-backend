@@ -4,7 +4,7 @@ const path = require('path')
 const app = express()
 
 // ============================================
-// 환경 설정
+// 환경 설정 
 // ============================================
 const ENV = process.env.NODE_ENV || 'development'
 const PORT = process.env.PORT || 8080
